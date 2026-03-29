@@ -1,0 +1,39 @@
+name: Pipeline Alimentos
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: db_alimentos
+        ports:
+          - 3306:3306
+
+    steps:
+    - name: Clonar código
+      uses: actions/checkout@v3
+
+    - name: Instalar Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: 3.10
+
+    - name: Instalar dependências
+      run: pip install -r requirements.txt
+
+    - name: Esperar MySQL iniciar
+      run: sleep 15
+
+    - name: Criar banco
+      run: mysql -h 127.0.0.1 -u root -proot db_alimentos < script.sql
+
+    - name: Rodar testes
+      run: pytest
