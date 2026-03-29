@@ -2,7 +2,7 @@ name: Pipeline Alimentos
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
@@ -16,6 +16,11 @@ jobs:
           MYSQL_DATABASE: db_alimentos
         ports:
           - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h localhost"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     steps:
     - name: Clonar código
@@ -24,16 +29,27 @@ jobs:
     - name: Instalar Python
       uses: actions/setup-python@v4
       with:
-        python-version: 3.10
+        python-version: "3.10"
+
+    - name: Instalar cliente MySQL
+      run: sudo apt-get update && sudo apt-get install -y mysql-client
+
+    - name: Atualizar pip
+      run: python -m pip install --upgrade pip
 
     - name: Instalar dependências
-      run: pip install -r requirements.txt
+      run: python -m pip install -r requirements.txt
 
     - name: Esperar MySQL iniciar
-      run: sleep 15
+      run: |
+        for i in {1..30}; do
+          mysqladmin ping -h 127.0.0.1 -u root -proot && break
+          sleep 1
+        done
 
-    - name: Criar banco
-      run: mysql -h 127.0.0.1 -u root -proot db_alimentos < script.sql
+    - name: Criar banco e tabela
+      run: |
+        mysql -h 127.0.0.1 -u root -proot < script.sql
 
     - name: Rodar testes
       run: pytest
