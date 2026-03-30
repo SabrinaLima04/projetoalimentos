@@ -1,15 +1,23 @@
 import mysql.connector
 
-conn = mysql.connector.connect(
-    host="mysql",
-    user="root",
-    password="root",
-    database="db_alimentos"
-)
 
-cursor = conn.cursor()
+# CONEXÃO COM O BANCO
+
+def conectar():
+    return mysql.connector.connect(
+        host="127.0.0.1",
+        user="root",
+        password="root",
+        database="alimentos"
+    )
+
+
+# GERAR SEC POR GRUPO
 
 def gerar_sec(grupo_id):
+
+    conn = conectar()
+    cursor = conn.cursor()
 
     cursor.execute("""
         SELECT MAX(sec)
@@ -24,31 +32,48 @@ def gerar_sec(grupo_id):
     else:
         sec = int(resultado[0]) + 1
 
+    conn.close()
     return sec
 
-# Gerar Código
-def gerar_codigo(pais, grupo_id, tipo_alimento, sec):
-    codigo = f"{pais}{grupo_id}{sec:04d}{tipo_alimento}"
-    return codigo
 
-# Colocar no Banco de Dados
+# GERAR CÓDIGO
+
+def gerar_codigo(pais, grupo_id, tipo_alimento, sec):
+
+    return f"{pais}{grupo_id}{sec:04d}{tipo_alimento}"
+
+
+# INSERIR NO BANCO
+
 def inserir_alimento(grupo_id, tipo_alimento, pais):
+
+    conn = conectar()
+    cursor = conn.cursor()
+
     sec = gerar_sec(grupo_id)
     codigo = gerar_codigo(pais, grupo_id, tipo_alimento, sec)
 
-    sql = "INSERT INTO alimentos (cod, sec, grupo_id, tipo_alimento, pais) VALUES (%s, %s, %s, %s, %s)"
-    valores = (codigo, sec, grupo_id, tipo_alimento, pais)
+    sql = """
+    INSERT INTO alimentos (cod, sec, grupo_id, tipo_alimento, pais)
+    VALUES (%s, %s, %s, %s, %s)
+    """
 
-
-    cursor.execute(sql, valores)
+    cursor.execute(sql, (codigo, sec, grupo_id, tipo_alimento, pais))
     conn.commit()
+
+    conn.close()
 
     print("\nAlimento inserido com sucesso!")
     print("SEC:", sec)
-    print("Cód:", codigo)
+    print("Código:", codigo)
 
-# Coletar Informações - (Main)
+    return codigo
+
+
+# PROGRAMA PRINCIPAL
+
 def main():
+
     print("Cadastro de Alimentos\n")
 
     grupo_id = input("Digite o grupo (A, B, C...): ").upper()
@@ -56,6 +81,7 @@ def main():
     pais = input("Digite o país (ex: BR): ").upper()
 
     inserir_alimento(grupo_id, tipo_alimento, pais)
+
 
 if __name__ == "__main__":
     main()
