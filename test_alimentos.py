@@ -2,11 +2,11 @@ import pytest
 import sqlite3
 from alimentos import gerar_codigo
 
-# Criar conexão e cursor do banco SQLite em memória
-conn = sqlite3.connect(":memory:")  # banco temporário em RAM
+# Conectar ao banco SQLite em memória
+conn = sqlite3.connect(":memory:")
 cursor = conn.cursor()
 
-# Criar tabela para armazenar os resultados
+# Criar tabela
 cursor.execute("""
 CREATE TABLE resultados (
     pais TEXT,
@@ -18,7 +18,27 @@ CREATE TABLE resultados (
 """)
 conn.commit()
 
-# Função auxiliar para inserir resultado
+# Fixture para finalizar a sessão e imprimir a tabela
+@pytest.fixture(scope="session", autouse=True)
+def mostrar_tabela_no_final(request):
+    # Função que será executada ao final da sessão
+    def finalizador():
+        print("\n" + "-"*50)
+        print("Tabela de Resultados dos Testes (Banco SQLite)")
+        print("-"*50)
+        cursor.execute("SELECT * FROM resultados")
+        resultados = cursor.fetchall()
+        headers = ["País", "Grupo 1", "Grupo 2", "Número", "Código Gerado"]
+        row_format = "{:<5} {:<7} {:<7} {:<6} {:<12}"
+        print(row_format.format(*headers))
+        print("-"*50)
+        for row in resultados:
+            print(row_format.format(*row))
+        conn.close()
+    request.addfinalizer(finalizador)
+
+
+# Função auxiliar para inserir resultados
 def inserir_resultado(pais, g1, g2, numero, codigo):
     cursor.execute(
         "INSERT INTO resultados (pais, grupo1, grupo2, numero, codigo_gerado) VALUES (?, ?, ?, ?, ?)",
@@ -26,6 +46,8 @@ def inserir_resultado(pais, g1, g2, numero, codigo):
     )
     conn.commit()
 
+
+# TESTES
 def test_codigo_primeiro_registro():
     codigo = gerar_codigo("BR", "A", "C", 1)
     inserir_resultado("BR", "A", "C", 1, codigo)
@@ -50,19 +72,3 @@ def test_numero_maior():
     codigo = gerar_codigo("BR", "A", "C", 123)
     inserir_resultado("BR", "A", "C", 123, codigo)
     assert codigo == "BRA0123C"
-
-# Hook do pytest para exibir tabela no final
-def pytest_terminal_summary(terminalreporter, exitstatus, config):
-    terminalreporter.write_sep("-", "Tabela de Resultados dos Testes (Banco SQLite)")
-    cursor.execute("SELECT * FROM resultados")
-    resultados = cursor.fetchall()
-    # Exibir tabela simples
-    headers = ["País", "Grupo 1", "Grupo 2", "Número", "Código Gerado"]
-    row_format = "{:<5} {:<7} {:<7} {:<6} {:<12}"
-    terminalreporter.write_line(row_format.format(*headers))
-    terminalreporter.write_line("-" * 42)
-    for row in resultados:
-        terminalreporter.write_line(row_format.format(*row))
-
-    # Fechar conexão
-    conn.close()
