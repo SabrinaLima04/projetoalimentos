@@ -1,10 +1,10 @@
 name: Pipeline CI
 
-on: [push]
+on:
+  push:
 
 jobs:
   test:
-
     runs-on: ubuntu-latest
 
     services:
@@ -22,24 +22,24 @@ jobs:
           --health-retries=5
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    - name: Checkout
-      uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
+      - name: Instalar dependências
+        run: |
+          pip install pytest mysql-connector-python
 
-    - name: Instalar dependências
-      run: |
-        pip install pytest mysql-connector-python
+      - name: Esperar MySQL iniciar
+        run: sleep 30
 
-    - name: Esperar MySQL iniciar
-      run: sleep 30
+      - name: Criar banco e tabela
+        run: |
+          mysql -h 127.0.0.1 -uroot -proot db_alimentos < schema.sql
 
-    - name: Criar banco e tabela
-      run: mysql -h 127.0.0.1 -uroot -proot < schema.sql
-
-    - name: Rodar testes
-      run: pytest -v
+      - name: Rodar testes
+        run: pytest -v
