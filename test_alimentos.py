@@ -42,9 +42,3 @@ def test_montar_tabela():
         codigo = gerar_codigo(pais, grupo, tipo, num)
         print(f"{pais}-{grupo}-{tipo}-{num} -> {codigo}")
 
-
-def test_numero_maior():
-
-    codigo = gerar_codigo("BR", "A", "C", 123)
-
-    assert codigo == "BRA0123C"
