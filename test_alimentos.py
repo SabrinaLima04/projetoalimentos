@@ -3,42 +3,40 @@ from alimentos import gerar_codigo
 
 
 def test_codigo_primeiro_registro():
-
     codigo = gerar_codigo("BR", "A", "C", 1)
-
     assert codigo == "BRA0001C"
 
 
 def test_codigo_segundo_registro():
-
     codigo = gerar_codigo("BR", "A", "B", 2)
-
     assert codigo == "BRA0002B"
 
 
 def test_codigo_outro_grupo():
-
     codigo = gerar_codigo("BR", "B", "A", 1)
-
     assert codigo == "BRB0001A"
 
 
 def test_zerofill_funciona():
-
     codigo = gerar_codigo("BR", "C", "D", 12)
-
     assert codigo == "BRC0012D"
+
+
+def test_numero_maior():
+    codigo = gerar_codigo("BR", "A", "C", 123)
+    assert codigo == "BRA0123C"
+
 
 def test_montar_tabela():
     dados = [
-        ("BR", "A", "C", 1),
-        ("BR", "A", "B", 2),
-        ("BR", "B", "A", 1),
-        ("BR", "C", "D", 12),
-        ("BR", "A", "C", 123),
+        ("BR", "A", "C", 1, "BRA0001C"),
+        ("BR", "A", "B", 2, "BRA0002B"),
+        ("BR", "B", "A", 1, "BRB0001A"),
+        ("BR", "C", "D", 12, "BRC0012D"),
+        ("BR", "A", "C", 123, "BRA0123C"),
     ]
 
-    for pais, grupo, tipo, num in dados:
+    for pais, grupo, tipo, num, esperado in dados:
         codigo = gerar_codigo(pais, grupo, tipo, num)
         print(f"{pais}-{grupo}-{tipo}-{num} -> {codigo}")
-
+        assert codigo == esperado
