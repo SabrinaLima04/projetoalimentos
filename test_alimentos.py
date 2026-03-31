@@ -36,7 +36,13 @@ def test_montar_tabela():
         ("BR", "A", "C", 123, "BRA0123C"),
     ]
 
+    print("\n================ TABELA DE CODIGOS ================")
+    print("PAIS | GRUPO | TIPO | NUM  | CODIGO")
+    print("--------------------------------------------------")
+
     for pais, grupo, tipo, num, esperado in dados:
         codigo = gerar_codigo(pais, grupo, tipo, num)
-        print(f"{pais}-{grupo}-{tipo}-{num} -> {codigo}")
+
+        print(f"{pais}   |   {grupo}    |   {tipo}   | {str(num).zfill(4)} | {codigo}")
+
         assert codigo == esperado
