@@ -1,4 +1,4 @@
-from alimentos import alimentos
+from alimentos import gerar_codigo
 from conexao import conectar
 
 def test_primeiro_codigo():
