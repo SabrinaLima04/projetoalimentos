@@ -53,4 +53,28 @@ def test_codigo_outro_grupo():
     inserir_resultado("BR", "B", "A", 1, codigo)
     assert codigo == "BRB0001A"
 
-def
+def test_zerofill_funciona():
+    codigo = gerar_codigo("BR", "C", "D", 12)
+    inserir_resultado("BR", "C", "D", 12, codigo)
+    assert codigo == "BRC0012D"
+
+def test_numero_maior():
+    codigo = gerar_codigo("BR", "A", "C", 123)
+    inserir_resultado("BR", "A", "C", 123, codigo)
+    assert codigo == "BRA0123C"
+
+# TESTE FINAL: imprime a tabela no terminal
+def test_mostrar_tabela_final():
+    cursor.execute("SELECT cod, sec, grupo_id, tipo_alimento, pais FROM alimentos")
+    resultados = cursor.fetchall()
+    headers = ["Código", "Número", "Grupo", "Tipo", "País"]
+    row_format = "{:<8} {:<6} {:<6} {:<6} {:<4}"
+    sys.stdout.write("\n" + "-"*50 + "\n")
+    sys.stdout.write("Tabela de Resultados dos Testes (MySQL)\n")
+    sys.stdout.write("-"*50 + "\n")
+    sys.stdout.write(row_format.format(*headers) + "\n")
+    sys.stdout.write("-"*50 + "\n")
+    for row in resultados:
+        sys.stdout.write(row_format.format(*row) + "\n")
+    sys.stdout.write("\n")
+    conn.close()
