@@ -29,6 +29,19 @@ def test_zerofill_funciona():
 
     assert codigo == "BRC0012D"
 
+def test_montar_tabela():
+    dados = [
+        ("BR", "A", "C", 1),
+        ("BR", "A", "B", 2),
+        ("BR", "B", "A", 1),
+        ("BR", "C", "D", 12),
+        ("BR", "A", "C", 123),
+    ]
+
+    for pais, grupo, tipo, num in dados:
+        codigo = gerar_codigo(pais, grupo, tipo, num)
+        print(f"{pais}-{grupo}-{tipo}-{num} -> {codigo}")
+
 
 def test_numero_maior():
 
